@@ -10,14 +10,13 @@ class Auto:
         self.color = color
         self.weight = weight
 
-
-    def move(self):
+    @staticmethod
+    def move() -> None:
         print("move")
 
-
-    def stop(self):
+    @staticmethod
+    def stop():
         print("stop")
-
 
     def birthday(self):
         self.age += 1
@@ -29,13 +28,13 @@ class Truck(Auto):
         super().__init__(brand, age, mark, color, weight)
         self.max_load = max_load
 
-
-    def move(self):
+    @staticmethod
+    def move():
         print("attention")
         super().move()
 
-
-    def load(self):
+    @staticmethod
+    def load():
         time.sleep(1)
         print("load")
         time.sleep(1)
@@ -47,10 +46,10 @@ class Car(Auto):
         super().__init__(brand, age, mark, color, weight)
         self.max_speed = max_speed
 
-
     def move(self):
         super().move()
         print(f'max speed is {self.max_speed}')
+
 
 truck1 = Truck("volvo", 2, "342", 4, "black", 10000)
 truck2 = Truck("reno", 3, "8yr", 2, "black", 7000)
@@ -77,7 +76,6 @@ print(truck1.max_load)
 print(truck2.color)
 print(truck2.weight)
 
-
 car1 = Car("mazda", 3, "3", 197, "black", 1487)
 car2 = Car("honda", 2, "civic", 190, "black", 1500)
 
@@ -102,6 +100,3 @@ print(car2.mark)
 print(car2.max_speed)
 print(car2.color)
 print(car2.weight)
-
-
-
