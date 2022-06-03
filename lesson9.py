@@ -1,5 +1,6 @@
 from datetime import date
 from dataclasses import dataclass
+from dataclasses import field
 
 
 class Car:
@@ -20,8 +21,14 @@ class Car:
 class Phone:
     price: float
     model: str
+    count: int #int = field(default_factory=int)
+
+    @staticmethod
+    def total_cost(self):
+        pass
 
 
+phone = Phone(price=400, model="lg")
 phone = Phone(price=400, model="lg")
 
 
