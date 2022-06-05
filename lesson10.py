@@ -1,5 +1,8 @@
 import math
 
+#Программа будет работать только если вводить положительные значения чисел. Все остальное соответсвует условиям задачи
+
+
 def execute_operation(number1, number2, operator):
     number1 = string_in_number(number1)
     number2 = string_in_number(number2)
@@ -8,13 +11,20 @@ def execute_operation(number1, number2, operator):
         return None
     try:
         if operator == "+":
-            return float(number1) + float(number2)
+            return number1 + number2
         elif operator == "-":
-            return float(number1) - float(number2)
+            return number1 - number2
         elif operator == "/":
-            return float(number1) / float(number2)
+            return number1 / number2
         elif operator == "*":
-            return float(number1) * float(number2)
+            return number1 * number2
+        elif operator == "-/":
+            return math.sqrt(number1)
+        elif operator == "^":
+            return math.pow(number1, number2)
+        elif operator == "!":
+            return math.factorial(int(number1))
+
     except ZeroDivisionError:
         print("Деление на ноль")
         return None
@@ -36,7 +46,7 @@ def string_in_number(string):
         return None
 
 
-operation_symbols = ["+", "-", "*", "/"]
+operation_symbols = ["+", "-", "*", "/", "^", "!"]
 
 # 3 + 5
 res = 0
@@ -55,16 +65,32 @@ while True:
         print("Неверное выражение")
         continue
 
+    operator = "".join(operations_in_string)
     if it_sqrt:
+        number_string = "".join([x for x in input_string if x.isdigit()])
+        result = execute_operation(number_string, 0, operator)
+        if not (result is None):
+            res = result
+            print(result)
         continue
 
-    operator = operations_in_string[0]
-    numbers = [x for x in input_string.split(operator) if x != ""] #формируем список чисел и удаляем пустые строки, если оператор стоял в начале или конце
+    # вычисление факториала
+    if operator == "!":
+        number_string = "".join([x for x in input_string if x.isdigit()])
+        result = execute_operation(number_string, 0, operator)
+        if not (result is None):
+            res = result
+            print(result)
+        continue
+
+    numbers = [x for x in input_string.split(operator) if
+               x != ""]  # формируем список чисел и удаляем пустые строки, если оператор стоял в начале или конце
     if len(numbers) != 2:
         print("Необходимо ввести только 2 числа")
         continue
 
-    execute_operation(*numbers, operator)
-
-
-
+    list_numbers = [res if x == "res" else x for x in numbers]
+    result = execute_operation(*list_numbers, operator)
+    if not result is None:
+        res = result
+        print(result)
