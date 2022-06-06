@@ -31,7 +31,7 @@ class Truck(Auto):
     @staticmethod
     def move():
         print("attention")
-        super().move()
+        Auto.move()
 
     @staticmethod
     def load():
