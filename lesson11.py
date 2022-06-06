@@ -1,9 +1,10 @@
 #Генератор
 def gen_geo(q):
-    start = 1
+    next_element = 1
     while True:
-        start *= q
-        yield start
+        next_element *= q
+        yield next_element
+
 
 gen = gen_geo(3)
 print(next(gen))
