@@ -32,17 +32,13 @@ class Lesson1:
     def ost(self):
         return self._a % self._b
 
-class R:
-    def __init__(self, radius):
-        self.radi = radius
-
-
-    @property
-    def radius(self):
-        return self.radi
 
 if __name__ == '__main__':
-
-    r = R(5)
-    print(r.radius)
+    lesson1 = Lesson1(4, 7)
+    print(lesson1.sum())
+    print(lesson1.difference())
+    print(lesson1.multiplication())
+    print(lesson1.raised_to_the_power())
+    print(lesson1.division())
+    print(lesson1.ost())
 
