@@ -27,7 +27,6 @@ class Phone:
     def total_cost(self):
         pass
 
-
 phone = Phone(price=400, model="lg")
 phone = Phone(price=400, model="lg")
 
