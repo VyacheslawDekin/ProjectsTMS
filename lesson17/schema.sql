@@ -6,3 +6,13 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     content TEXT NOT NULL
 );
+
+
+DROP TABLE IF EXISTS user;
+
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email STRING NOT NULL UNIQUE,
+    password VARCHAR(100),
+    name VARCHAR(100)
+);

@@ -17,7 +17,7 @@ def home():
     conn = get_db_connection()
     posts = conn.execute('SELECT * FROM posts').fetchall()
     conn.close()
-    return render_template('home.html', posts=posts)
+    return render_template('basic/home.html', posts=posts)
 
 
 def get_post(post_id):
@@ -33,7 +33,7 @@ def get_post(post_id):
 @posts_bp.route('/post/<int:post_id>')
 def show_post(post_id):
     post = get_post(post_id)
-    return render_template('post.html', post=post)
+    return render_template('basic/post.html', post=post)
 
 
 @posts_bp.route('/create', methods=('GET', 'POST'))
@@ -55,7 +55,7 @@ def create():
             conn.close()
             return redirect(url_for('home'))
 
-    return render_template('create.html')
+    return render_template('basic/create.html')
 
 
 @posts_bp.route('/edit/<int:post_id>', methods=('GET', 'POST'))
@@ -80,7 +80,7 @@ def edit(post_id):
             conn.close()
             return redirect(url_for('home'))
 
-    return render_template('edit.html', post=post)
+    return render_template('basic/edit.html', post=post)
 
 
 @posts_bp.route('/delete/<int:post_id>', methods=('POST',))
@@ -91,4 +91,5 @@ def delete(post_id):
     conn.commit()
     conn.close()
     flash(f'"{post["title"]}" was successfully deleted!')
+
     return redirect(url_for('home'))
