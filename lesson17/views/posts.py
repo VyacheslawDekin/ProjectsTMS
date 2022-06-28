@@ -1,6 +1,7 @@
 import sqlite3
 from flask import render_template, request, url_for, flash, redirect, Blueprint
 from werkzeug.exceptions import abort
+from flask_login import login_required
 
 
 posts_bp = Blueprint('posts', __name__)
@@ -37,6 +38,7 @@ def show_post(post_id):
 
 
 @posts_bp.route('/create', methods=('GET', 'POST'))
+@login_required
 def create():
     if request.method == 'POST':
         title = request.form['title']
@@ -59,6 +61,7 @@ def create():
 
 
 @posts_bp.route('/edit/<int:post_id>', methods=('GET', 'POST'))
+@login_required
 def edit(post_id):
     post = get_post(post_id)
 
@@ -84,6 +87,7 @@ def edit(post_id):
 
 
 @posts_bp.route('/delete/<int:post_id>', methods=('POST',))
+@login_required
 def delete(post_id):
     post = get_post(post_id)
     conn = get_db_connection()
