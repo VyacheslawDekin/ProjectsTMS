@@ -1,5 +1,6 @@
 import sqlite3
 from flask import render_template, request, url_for, flash, redirect, Blueprint
+from flask_login import login_required
 from werkzeug.exceptions import abort
 from models import Posts
 from app import db
@@ -23,6 +24,7 @@ def show_post(post_id):
 
 
 @posts.route('/create', methods=('GET', 'POST'))
+@login_required
 def create():
     if request.method == 'POST':
         title = request.form['title']
@@ -43,6 +45,7 @@ def create():
 
 
 @posts.route('/edit/<int:post_id>', methods=('GET', 'POST'))
+@login_required
 def edit(post_id):
     post = Posts.query.filter_by(id=post_id).first()
 
@@ -64,6 +67,7 @@ def edit(post_id):
 
 
 @posts.route('/delete/<int:post_id>', methods=('POST',))
+@login_required
 def delete(post_id):
     post = Posts.query.filter_by(id=post_id).first()
     db.session.delete(post)
