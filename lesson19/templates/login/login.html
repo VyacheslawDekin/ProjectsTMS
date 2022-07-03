@@ -1,0 +1,22 @@
+{% extends "base_profile.html" %}
+{% load crispy_forms_tags %}
+{% load bootstrap4 %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Log in to your account</h4>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                {{ form|crispy }}
+
+                <button type="submit" class="btn btn-primary btn-block">Log in</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
