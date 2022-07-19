@@ -2,6 +2,14 @@
 
 {% block title %}
    <h1>Welcome to DjangoBlog</h1>
+    <form method="get">
+        <div class="input-group mb-3">
+            <input type="date" name="date" value="{{ date }}">
+            <input name="search" type="text" class="form-control" placeholder="Введите название поста"
+                value="{{ search }}" aria-describedby="button-addon2">
+            <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Найти</button>
+        </div>
+    </form>
 {% endblock %}
 
 {% block content %}
@@ -9,6 +17,7 @@
         <a href="{% url 'show_post' post.id %}">
             <h2>{{ post.title }}</h2>
         </a>
+        <span class="badge badge-primary">{{ post.author }}</span>
         <span class="badge badge-primary">{{ post.created }}</span>
         {% if user.is_authenticated %}
         <a href="{% url 'edit_post' post.id %}">
@@ -17,4 +26,74 @@
         {% endif %}
         <hr>
     {% endfor %}
+{% endblock %}
+
+
+{% block footer %}
+{% load l10n %}
+    <footer class="text-center text-lg-start text-muted">
+    <div class="container p-4">
+
+        {% if num_pages != 1 %}
+        <nav aria-label="...">
+          <ul class="pagination justify-content-center">
+
+          {% localize off %}
+            {# Первая страница #}
+            {% if page > 2 %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'home' %}?page=1&search={{ search }}">1 << </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+              <a class="page-link" href="{% url 'home' %}?page={{ page | add:'-1' }}&search={{ search }}">Предыдущая</a>
+            </li>
+
+            {# Предыдущая страница #}
+            {% if page != 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{% url 'home' %}?page={{ page|add:'-1' }}&search={{ search }}">{{ page|add:'-1' }}</a>
+                </li>
+            {% endif %}
+
+
+            {# Текущая страница #}
+            <li class="page-item active" aria-current="page">
+              <a class="page-link">{{ page }}</a>
+            </li>
+
+
+            {# Следующая страница #}
+            {% if num_pages != page %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'home' %}?page={{ page|add:'1' }}&search={{ search }}">{{ page|add:'1' }}</a>
+            </li>
+            {% endif %}
+
+            {# Запасная страница #}
+            {% if page == 1 and page < num_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{% url 'home' %}?page={{ page|add:'2' }}&search={{ search }}">{{ page|add:'2' }}</a>
+            </li>
+            {% endif %}
+
+            {# Следующая страница #}
+            <li class="page-item {% if page == num_pages %}disabled{% endif %}">
+              <a class="page-link" href="{% url 'home' %}?page={{ page|add:'1' }}&search={{ search }}">Следующая</a>
+            </li>
+
+            {# Последняя страница #}
+            {% if page < num_pages|add:'-1' %}
+            <li class="page-item">
+              <a class="page-link" href="{% url 'home' %}?page={{ num_pages }}&search={{ search }}"> >> {{ num_pages }}</a>
+            </li>
+            {% endif %}
+          {% endlocalize %}
+          </ul>
+        </nav>
+    {% endif %}
+    </div>
+</footer>
+
 {% endblock %}

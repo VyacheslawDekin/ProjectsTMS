@@ -1,4 +1,8 @@
 from _curses import flash
+import datetime
+
+from django.core.paginator import Paginator
+from faker import Faker
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,8 +13,48 @@ from .models import Posts
 
 
 def home(request):
-    posts = Posts.objects.all()
-    return render(request, 'basic/home.html', {'posts': posts})
+
+    posts_limit = 50
+    try:
+        page = int(request.GET.get('page', 1))
+    except ValueError:
+        page = 1
+
+    search = request.GET.get('search', '')
+    date = request.GET.get('date')
+
+    if search and date:
+        start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        end_date = start_date + datetime.timedelta(days=1)
+
+        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date))
+    elif search:
+        posts = Posts.objects.filter(title__contains=search)
+    elif date:
+        start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        end_date = start_date + datetime.timedelta(days=1)
+
+        posts = Posts.objects.filter(created__range=(start_date, end_date))
+    else:
+        posts = Posts.objects.all()
+
+    posts_paginator = Paginator(posts, posts_limit)
+
+    if page > posts_paginator.num_pages:
+        page = posts_paginator.num_pages
+    if page < 1:
+        page = 1
+
+    return render(
+        request, 'basic/home.html',
+        {
+            'posts': posts_paginator.page(page),
+            'search': search,
+            'date': date,
+            'page': page,
+            'num_pages': int(posts_paginator.num_pages)
+        }
+    )
 
 
 @login_required(login_url='/')
@@ -103,3 +147,22 @@ def signup(request):
 
     return render(request, 'login/signup.html')
 
+
+def create_fake_posts(request):
+    """
+
+    :type request: object
+    """
+    faker_ = Faker('ru_RU')
+
+    posts = []
+    for i in range(340):
+        posts.append(
+            Posts(title=faker_.sentence(nb_words=5),
+                  content=faker_.sentence(nb_words=50),
+                  author=User.objects.order_by("?").first())
+        )
+
+    Posts.objects.bulk_create(posts)
+
+    return redirect('home')

@@ -13,6 +13,7 @@ urlpatterns = [
     path('post/<int:post_id>/', views.show_post, name='show_post'),
     path('delete/<int:post_id>/', views.delete_post, name='delete_post'),
     path('profile/', views.profile, name='profile'),
+    path('create-fakeposts/', views.create_fake_posts, name='create_fake_posts'),
 ]
 
 
