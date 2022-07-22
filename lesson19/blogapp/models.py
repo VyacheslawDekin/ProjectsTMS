@@ -15,5 +15,11 @@ class Posts(models.Model):
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
 
+        indexes = (
+            models.Index(
+                fields=['title', 'author']
+            ),
+        )
+
     def __str__(self):
         return f'{self.created} |  {self.title}'
