@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
+
     'bootstrap4',
     'crispy_forms',
     'blogapp',
@@ -51,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'blog.urls'
@@ -109,13 +113,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'Etc/GMT-3'
+TIME_ZONE = 'Europe/Minsk'
 
 USE_I18N = True
 
@@ -132,6 +140,7 @@ STATIC_ROOT = BASE_DIR + '/static'
 
 
 LOGIN_REDIRECT_URL = '/'
+
 
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
