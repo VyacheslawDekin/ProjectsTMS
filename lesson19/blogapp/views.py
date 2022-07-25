@@ -27,16 +27,21 @@ def home(request):
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         end_date = start_date + datetime.timedelta(days=1)
 
-        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date)).select_related('author')
+        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date)).select_related('author')\
+            .values('id', 'title', 'content', 'created', 'author__username')
     elif search:
-        posts = Posts.objects.filter(title__contains=search).select_related('author')
+        posts = Posts.objects.filter(title__contains=search).select_related('author')\
+            .values('id', 'title', 'content', 'created', 'author__username')
     elif date:
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         end_date = start_date + datetime.timedelta(days=1)
 
-        posts = Posts.objects.filter(created__range=(start_date, end_date)).select_related('author')
+        posts = Posts.objects.filter(created__range=(start_date, end_date))\
+            .select_related('author')\
+            .values('id', 'title', 'content', 'created', 'author__username')
     else:
-        posts = Posts.objects.all().select_related('author')
+        posts = Posts.objects.all().select_related('author')\
+            .values('id', 'title', 'content', 'created', 'author__username')
 
     posts_paginator = Paginator(posts, posts_limit)
 
