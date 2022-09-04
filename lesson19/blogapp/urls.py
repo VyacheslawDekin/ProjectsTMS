@@ -18,9 +18,19 @@ urlpatterns = [
     path('create-fakeposts/', views.create_fake_posts, name='create_fake_posts'),
 
     #API
-    path('posts-api', views.posts_api, name='post_api'),
-    path('posts-api/<int:pk>', views.post_api_detail, name='post_api_detail'),
+    path('posts-api', views.posts_api),
+    path('posts-api/<int:pk>', views.post_api_detail),
 
+    #API v2
+    path('posts-api/v2', views.PostsViewApi.as_view()),
+    path('posts-api/v2/<int:pk>', views.PostsViewApi.as_view()),
+
+    #API view v3
+    path('posts-api/v3', views.PostsListCreateApiView.as_view()),
+    path('posts-api/v3/<int:pk>', views.PostsRetrieveUpdateDestroyAPIView.as_view()),
+
+    path('users-api/v3', views.UserListCreateAPIView.as_view()),
+    path('users-api/v3/<username>', views.PostsRetrieveUpdateDestroyAPIView.as_view()),
 ]
 
 

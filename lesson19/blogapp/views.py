@@ -2,11 +2,14 @@ from _curses import flash
 import datetime
 
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import JsonResponse
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
-from rest_framework.views import Response
+from rest_framework.views import Response, APIView
+from rest_framework import permissions
+
 from django.views.decorators.csrf import csrf_exempt
 from faker import Faker
 
@@ -16,8 +19,8 @@ from django.shortcuts import render, Http404, redirect
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.hashers import make_password
 from .models import Posts
-
-from .serializers import PostsSerialiser
+from django.shortcuts import get_object_or_404
+from .serializers import PostsSerialiser, PostsPermission, UsersSerializer, UserCreateSerializer
 
 
 def home(request):
@@ -34,11 +37,15 @@ def home(request):
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         end_date = start_date + datetime.timedelta(days=1)
 
-        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date)).select_related(
+        query = Q(title__contains=search) | Q(content__contains=search)
+        query &= Q(created__range=(start_date, end_date))
+
+        posts = Posts.objects.filter(query).select_related(
             'author') \
             .values('id', 'title', 'content', 'created', 'author__username')
     elif search:
-        posts = Posts.objects.filter(title__contains=search).select_related('author') \
+        query = Q(title__contains=search) | Q(content__contains=search)
+        posts = Posts.objects.filter(query).select_related('author') \
             .values('id', 'title', 'content', 'created', 'author__username')
     elif date:
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
@@ -203,11 +210,8 @@ def posts_api(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def post_api_detail(request, pk: int):
-    try:
-        post = Posts.objects.get(id=pk)
-    except Posts.DoesNotExist:
-        return Response({'detail': 'post not found'}, status=status.HTTP_404_NOT_FOUND)
+def post_api_detail(request, pk):
+    post = get_object_or_404(Posts, id=pk)
 
     if request.method == "GET":
         serializer = PostsSerialiser(post)
@@ -227,5 +231,98 @@ def post_api_detail(request, pk: int):
 
     else:
         return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class PostsViewApi(APIView):
+
+    def get(self, request):
+        posts = Posts.objects.all()[:50]
+        serializer = PostsSerialiser(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        if request.user.is_anonymous:
+            return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = PostsSerialiser(data=request.data)
+        print(request.data)
+        if serializer.is_valid():
+            author = request.user
+            created = datetime.datetime.now()
+            serializer.save(author=author, created=created)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        if request.user.is_anonymous:
+            return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        post = get_object_or_404(Posts, id=pk)
+
+        serializer = PostsSerialiser(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        if request.user.is_anonymous:
+            return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        post = get_object_or_404(Posts, id=pk)
+        post.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PostsListCreateApiView(generics.ListCreateAPIView):
+    serializer_class = PostsSerialiser
+    queryset = Posts.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        created = datetime.datetime.now()
+        serializer.save(author=self.request.user, created=created)
+
+
+    def get_queryset(self):
+        query = Q()
+
+        if self.request.GET.get("date"):
+            date = self.request.GET.get("date")
+            start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
+            end_date = start_date + datetime.timedelta(days=1)
+
+            query = Q(created__range=(start_date, end_date))
+
+        if self.request.GET.get("search"):
+            search = self.request.GET.get("search")
+            query &= Q(title__contains=search) | Q(content__contains=search)
+
+        posts = Posts.objects.filter(query).select_related('author') \
+            .values('id', 'title', 'content', 'created', 'author__username')
+
+        return posts
+
+
+class PostsRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = PostsSerialiser
+    queryset = Posts.objects.all()
+    permission_classes = [PostsPermission]
+    lookup_field = 'id'
+    lookup_url_kwarg = 'pk'
+
+
+class UserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return UsersSerializer
+
+        return UserCreateSerializer
 
 
