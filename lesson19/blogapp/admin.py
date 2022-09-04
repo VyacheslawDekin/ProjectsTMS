@@ -24,7 +24,7 @@ class PostsAdmin(admin.ModelAdmin):
     @admin.display(description='content')
     def content_str(self, post: Posts):
         return mark_safe(f"""
-        <div style="color: green;" > {post.content[:30]} ... </div>   
+        <div style="color: green;" > {post.content [:30]} ... </div>   
         """)
 
     @admin.display(description='link')

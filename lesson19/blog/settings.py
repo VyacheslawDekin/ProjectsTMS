@@ -26,7 +26,8 @@ SECRET_KEY = '82uw%@(k=jl8+_y+55akkz%42=c_@lo_!h=#+y&v9x$&8*=g&q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '172.20.60.153']
+INTERNAL_IPS = ['127.0.0.1', '172.20.60.153']
 
 
 # Application definition
@@ -38,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
+    'rest_framework',
 
     'bootstrap4',
     'crispy_forms',
@@ -53,9 +54,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar_force.middleware.ForceDebugToolbarMiddleware',
+                   'debug_toolbar.middleware.DebugToolbarMiddleware',]
 
 ROOT_URLCONF = 'blog.urls'
 
@@ -87,8 +91,8 @@ DATABASES = {
         # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bloagapp',
-        'USER': 'postgres',
-        'PASSWORD': 'user',
+        'USER': 'django',
+        'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': 5432,
     }
@@ -113,10 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -137,11 +137,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR + '/static'
-
+# STATICFILES_DIRS = [
+#     BASE_DIR + '/static'
+# ]
 
 LOGIN_REDIRECT_URL = '/'
-
-
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

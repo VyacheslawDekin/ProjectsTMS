@@ -2,6 +2,12 @@ from _curses import flash
 import datetime
 
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from rest_framework import status
+from rest_framework.parsers import JSONParser
+from rest_framework.decorators import api_view
+from rest_framework.views import Response
+from django.views.decorators.csrf import csrf_exempt
 from faker import Faker
 
 from django.contrib import messages
@@ -11,9 +17,10 @@ from django.contrib.auth.models import Group, User
 from django.contrib.auth.hashers import make_password
 from .models import Posts
 
+from .serializers import PostsSerialiser
+
 
 def home(request):
-
     posts_limit = 50
     try:
         page = int(request.GET.get('page', 1))
@@ -27,20 +34,21 @@ def home(request):
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         end_date = start_date + datetime.timedelta(days=1)
 
-        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date)).select_related('author')\
+        posts = Posts.objects.filter(title__contains=search, created__range=(start_date, end_date)).select_related(
+            'author') \
             .values('id', 'title', 'content', 'created', 'author__username')
     elif search:
-        posts = Posts.objects.filter(title__contains=search).select_related('author')\
+        posts = Posts.objects.filter(title__contains=search).select_related('author') \
             .values('id', 'title', 'content', 'created', 'author__username')
     elif date:
         start_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         end_date = start_date + datetime.timedelta(days=1)
 
-        posts = Posts.objects.filter(created__range=(start_date, end_date))\
-            .select_related('author')\
+        posts = Posts.objects.filter(created__range=(start_date, end_date)) \
+            .select_related('author') \
             .values('id', 'title', 'content', 'created', 'author__username')
     else:
-        posts = Posts.objects.all().select_related('author')\
+        posts = Posts.objects.all().select_related('author') \
             .values('id', 'title', 'content', 'created', 'author__username')
 
     posts_paginator = Paginator(posts, posts_limit)
@@ -171,3 +179,53 @@ def create_fake_posts(request):
     Posts.objects.bulk_create(posts)
 
     return redirect('home')
+
+
+@api_view(['GET', 'POST'])
+def posts_api(request):
+    if request.method == "GET":
+        posts = Posts.objects.all()[:50]
+        serializer = PostsSerialiser(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == "POST" and not request.user.is_anonymous:
+        serializer = PostsSerialiser(data=request.data)
+        print(request.data)
+        if serializer.is_valid():
+            author = request.user
+            created = datetime.datetime.now()
+            serializer.save(author=author, created=created)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def post_api_detail(request, pk: int):
+    try:
+        post = Posts.objects.get(id=pk)
+    except Posts.DoesNotExist:
+        return Response({'detail': 'post not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = PostsSerialiser(post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == "PUT" and not request.user.is_anonymous:
+        serializer = PostsSerialiser(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == "DELETE" and not request.user.is_anonymous:
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    else:
+        return Response({'detail': 'not authorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+

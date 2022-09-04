@@ -13,7 +13,14 @@ urlpatterns = [
     path('post/<int:post_id>/', views.show_post, name='show_post'),
     path('delete/<int:post_id>/', views.delete_post, name='delete_post'),
     path('profile/', views.profile, name='profile'),
+
+    #Fake
     path('create-fakeposts/', views.create_fake_posts, name='create_fake_posts'),
+
+    #API
+    path('posts-api', views.posts_api, name='post_api'),
+    path('posts-api/<int:pk>', views.post_api_detail, name='post_api_detail'),
+
 ]
 
 
